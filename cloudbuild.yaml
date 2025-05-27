@@ -1,0 +1,25 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/legal-rag-mcp', '.']
+  
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/legal-rag-mcp']
+  
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'legal-rag-mcp'
+      - '--image=gcr.io/$PROJECT_ID/legal-rag-mcp'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--service-account=legal-rag-app@${PROJECT_ID}.iam.gserviceaccount.com'
+      - '--no-allow-unauthenticated'
+      - '--set-env-vars=GOOGLE_CLOUD_PROJECT=${PROJECT_ID}'
+
+images:
+  - 'gcr.io/$PROJECT_ID/legal-rag-mcp'
